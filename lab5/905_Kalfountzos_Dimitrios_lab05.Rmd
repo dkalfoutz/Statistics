@@ -1,0 +1,629 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab05 !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+Point Estimates and Confidence Intervals
+Statistical inference is the process of analyzing sample data to gain insight into the population from
+which the data was collected and to investigate differences between data samples. In data analysis,
+we are often interested in the characteristics of some large population, but collecting data on the
+entire population may be infeasible. For example, leading up to U.S. presidential elections it could
+be very useful to know the political leanings of every single eligible voter, but surveying every
+voter is not feasible. Instead, we could poll some subset of the population, such as a thousand
+registered voters, and use that data to make inferences about the population as a whole.
+1. Point Estimates
+Point estimates are estimates of population parameters based on sample data. For instance, if we
+wanted to know the average age of registered voters in the U.S., we could take a survey of
+registered voters and then use the average age of the respondents as a point estimate of the average
+age of the population as a whole. The average of a sample is known as the sample mean.
+The sample mean is usually not exactly the same as the population mean. This difference can be
+caused by many factors including poor survey design, biased sampling methods and the
+randomness inherent to drawing a sample from a population. Let's investigate point estimates by
+generating a population of random age data and then drawing a sample from it to estimate the
+mean:
+
+
+
+```{r}
+set.seed(12)
+population_ages <- c(rexp(1000000,0.015)+18, # Generate a population
+rpois(500000,20)+18,
+rpois(500000,32.5)+18,
+rpois(500000,45)+18)
+population_ages <- ifelse(population_ages<100, population_ages, population_ages%%100+18)
+true_mean <- mean(population_ages) # Check the population mean
+true_mean
+
+
+
+set.seed(10)
+sample_ages <- sample(population_ages, size=1000) # Take a sample of 1000 ages
+sample_mean <- mean(sample_ages) # Make a point estimate of the mean
+sample_mean
+sample_mean-true_mean #Check difference between estimate and population parameter
+
+```
+
+
+
+Our point estimate based on a sample of 1000 individuals overestimates the true population mean
+by almost a year, but it is pretty close. This illustrates an important point: we can get a fairly
+accurate estimate of a large population by sampling a relatively small subset of individuals.
+Another point estimate that may be of interest is the proportion of the population that belongs to
+some category or subgroup. For example, we might like to know the race of each voter we poll, to
+get a sense of the overall demographics of the voter base. You can make a point estimate of this
+sort of proportion by taking a sample and then checking the ratio in the sample:
+
+
+
+```{r}
+set.seed(12)
+population_races <- c(rep("white",1000000), # Generate some dummy demographic data
+rep("hispanic",500000),
+rep("black",500000),
+rep("asian",250000),
+rep("other",250000))
+demographic_sample <- sample(population_races, size=1000) # Take a sample
+for (race in unique(demographic_sample)){ # Loop over each race*
+print(paste(race," proportion estimate:"))
+print(sum(demographic_sample==race)/1000) # Print the estimated proportion
+}
+
+```
+
+
+
+*Note: The function unique() takes a vector and returns a new vector with duplicate elements
+removed.
+Sampling Distributions and The Central Limit Theorem
+Many statistical procedures assume that data follows a normal distribution, because the normal
+distribution has nice properties like symmetricity and having the majority of the data clustered
+within a few standard deviations of the mean. Unfortunately, real world data is often not normally
+distributed and the distribution of a sample tends to mirror the distribution of the population. This
+means a sample taken from a population with a skewed distribution will also tend to be skewed.
+Let's investigate by plotting the data and sample we created earlier and by checking the skew:
+
+
+```{r}
+library(UsingR)
+
+library(e1071)
+```
+```{r}
+library(UsingR)
+
+hist(population_ages, breaks=20) # Create histogram of population
+skewness(population_ages) # Check the skewness
+```
+Out[5]:
+0.655602782446446
+
+
+The histogram shows a distribution with right skew, which is confirmed by the skewness
+measurement of 0.6556. The sample we drew should have roughly the same shape and skewness
+
+
+
+```{r}
+hist(sample_ages, breaks=20) # Create histogram of the sample
+skewness(sample_ages) # Check the skewness (point estimate of skewness)
+```
+Out[6]:
+0.670960675526386
+
+
+
+
+
+The sample has roughly the same skew as the underlying population. This suggests that we can't
+apply techniques that assume a normal distribution to this data set. In reality, we can, thanks the
+central limit theorem.
+The central limit theorem is one of the most important results of probability theory and serves as
+the foundation of many methods of statistical analysis. At a high level, the theorem states the
+distribution of many sample means, known as a sampling distribution, will be normally distributed.
+This rule holds even if the underlying distribution itself is not normally distributed. As a result we
+can treat our a sample mean as if it were drawn normal distribution.
+To illustrate, let's create a sampling distribution by taking 200 samples from our population and
+then making 200 point estimates of the mean:
+
+
+```{r}
+set.seed(12)
+point_estimates <- c() # Create an empty vector to hold results
+num_samples <- 200 # Initialize number of samples to take
+for (x in 1:num_samples){ # Draw 200 samples and make 200 point estimates
+sample <- sample(population_ages, size=1000)
+point_estimates <- c(point_estimates, mean(sample))
+}
+plot(density(point_estimates)) # Plot the sampling distribution
+```
+The sampling distribution appears to be roughly normal, having significantly less skew than the
+original distribution:
+```{r}
+skewness(point_estimates)
+```
+Out[8]:
+-0.0130738593557108
+
+
+In addition, the mean of the sampling distribution approaches the true population mean:
+
+```{r}
+mean(point_estimates)
+mean(point_estimates)-true_mean# Difference between true mean and sample means
+
+```
+
+
+
+The more samples we take, the better our estimate of the population parameter is likely to be.
+
+
+
+
+
+
+
+2. Confidence Intervals for One Mean
+In this section, we'll learn how to calculate a confidence interval for a population mean. As we'll
+soon see, a confidence interval is an interval (or range) of values that we can be really confident
+contains the true unknown population mean. We'll get our feet wet by first learning how to
+calculate a confidence interval for a population mean (called a Z-interval) by making the
+unrealistic assumption that we know the population variance. (Why would we know the
+population variance but not the population mean?!) Then, we'll derive a formula for a confidence
+interval for a population mean (called a t-interval) for the more realistic situation that we don't
+know the population variance. We'll also spend some time working on understanding the
+"confidence part" of an interval, as well as learning what factors affect the length of an interval.
+Objectives
+• To learn how to calculate a confidence interval for a population mean.
+• To understand the statistical interpretation of confidence.
+• To learn what factors affect the length of an interval.
+• To understand the steps involved in each of the proofs in the lesson.
+• To be able to apply the methods learned in the lesson to new problems.
+The Situation
+Point estimates, such as the sample proportion ( ??p ), the sample mean ( x ), and the sample
+variance (
+2 s ) depend on the particular sample selected. For example:
+(1) We might know that
+??p , the proportion of a sample of 88 students who use the city bus daily
+to get to campus, is 0.38. But, the bus company doesn't want to know the sample proportion. The
+bus company wants to know population proportion p, the proportion of all of the students in
+town who use the city bus daily.
+(2) We might know that x , the average number of credit cards of 32 randomly selected
+American college students is 2.2. But, we want to know ì, the average number of credit cards
+of all American college students.
+The Problem
+(1) When we use the sample mean x to estimate the population mean ì, can we be confident
+that x is close to ì? And, when we use the sample proportion
+??p to estimate the population
+proportion p, can we be confident that
+??p is close to p?
+(2) Do we have any idea as to how close the sample statistic is to the population parameter?
+A Solution
+Rather than using just a point estimate, we could find an interval (or range) of values that we can
+be really confident contains the actual unknown population parameter. For example, we could
+find lower (L) and upper (U) values between which we can be really confident the population
+mean falls:
+L < ì < U
+And, we could find lower (L) and upper (U) values between which we can be really confident the
+population proportion falls:
+L < p < U
+An interval of such values is called a confidence interval. Each interval has a confidence
+coefficient (reported as a proportion):
+1 ??? á
+or a confidence level (reported as a percentage):
+(1 ??? á)100%
+Typical confidence coefficients are 0.90, 0.95, and 0.99, with corresponding confidence levels
+90%, 95%, and 99%. For example, upon calculating a confidence interval for a mean with a
+confidence level of, say 95%, we can say:
+"We can be 95% confident that the population mean falls between L and U."
+As should agree with our intuition, the greater the confidence level, the more confident we can
+be that the confidence interval contains the actual population parameter.
+2.1 A Z-Interval for a Mean
+Now that we have a general idea of what a confidence interval is, we'll now turn our attention to
+deriving a particular confidence interval, namely that of a population mean ì. We'll jump right
+ahead to the punch line and then back off and prove the result. But, before stating the result, we
+need to remind ourselves of a bit of notation.
+The value:
+/2 z???
+is the Z-value (obtained from a standard normal table or calculated by the qnorm() function)
+such that the area to the right of it under the standard normal curve is á/2. That is:
+P(Z???zá/2)=á/2
+Likewise:
+???zá/2
+is the Z-value (obtained from a standard normal table) such that the area to the left of it under the
+standard normal curve is á/2. That is:
+P(Z??????zá/2)=á/2
+This notation can be illustrated with the following diagram of a standard normal curve:
+With the notation now recalled, let's state the formula for a confidence interval for the population
+mean.
+Theorem. Assume:
+(1) X1, X2, ..., Xn is a random sample from a normal population with mean ì and variance ó2.
+So that:
+2
+( , ) and (0,1)
+/
+X
+X N Z N
+n n
+??? ???
+???
+???
+???
+???
+(2) The population variance ó2 is known.
+Then, a (1 ??? á)100% confidence interval for the mean ì is:
+X z /2 ( )
+
+
+
+IMAGE
+
+
+
+The interval, because it depends on Z, is often referred to as the Z-interval for a mean.
+More generally, we can find the values for any confidence level. This is usually denoted in
+reverse by calling it a (1-á)100% confidence level. Where for any á in (0,1) we can find a z* with
+P(-z* < z < z*) = 1-á
+Often such a z* is called z1-á/2 from how it is found. For R this can be found with the qnorm
+function
+
+
+```{r}
+alpha = c(0.2,0.1,0.05,0.001)
+zstar = qnorm(1 - alpha/2)
+zstar
+
+```
+
+
+
+
+
+
+Example
+A random sample of 126 police officers subjected to constant inhalation of automobile exhaust
+fumes in downtown Cairo had an average blood lead level concentration of 29.2 ìg/dl.
+Assume X, the blood lead level of a randomly selected policeman, is normally distributed with a
+standard deviation of ó = 7.5 ìg/dl. Historically, it is known that the average blood lead level
+concentration of humans with no exposure to automobile exhaust is 18.2 ìg/dl. Is there
+convincing evidence that policemen exposed to constant auto exhaust have elevated blood lead
+level concentrations? (Data source: Kamal, Eldamaty, and Faris, "Blood lead level of Cairo
+traffic policemen," Science of the Total Environment, 105(1991): 165-170.)
+Solution. Let's try to answer the question by calculating a 95% confidence interval for the
+population mean. For a 95% confidence interval, 1???á = 0.95, so that á = 0.05 and á/2 = 0.025.
+Therefore, as the following diagram illustrates the situation, z0.025 = 1.96:
+Now, substituting in what we know ( x = 29.2, n = 126, ó = 7.5, and z0.025 = 1.96) into the
+formula for a Z-interval for a mean, we get:
+[29.2 1.96(7.5 / 126),??? 29.2 ???1.96(7.5 / 126)]
+Simplifying, we get a 95% confidence interval for the mean blood lead level concentration of all
+policemen exposed to constant auto exhaust:
+[27.89,30.51]
+That is, we can be 95% confident that the mean blood lead level concentration of all policemen
+exposed to constant auto exhaust is between 27.9 ìg/dl and 30.5 ìg/dl. Note that the interval
+does not contain the value 18.2, the average blood lead level concentration of humans with no
+exposure to automobile exhaust. In fact, all of the values in the confidence interval are much
+greater than 18.2. Therefore, there is convincing evidence that policemen exposed to constant
+auto exhaust have elevated blood lead level concentrations.
+2.2 A t-Interval for a Mean
+So far, we have shown that the formula:
+/2X z ( )
+n
+???
+???
+???
+is appropriate for finding a confidence interval for a population mean if two conditions are met:
+(1) The population standard deviation ó is known, and
+(2) X1, X2, ..., Xn are normally distributed. (The truth is that X1, X2, ..., Xn need not be normally
+distributed as long as the sample size n is large enough for the Central Limit Theorem to apply.
+In this case, the confidence interval is an approximate confidence interval.)
+Now, as suggested earlier in this section, it is unrealistic to think that we'd ever be in a situation
+where condition (1) would be met. That is, when would we ever know the population standard
+deviation ó, but not the population mean ì? Let's entertain, then, the realistic situation in which
+not only the population mean ì is unknown, but also the population standard deviation ó is
+unknown.
+What if ó is unknown?
+Yes, the reasonable thing to do is to estimate the population standard deviation ó with the sample
+standard deviation:
+2
+1
+1
+( )
+i
+n
+i
+S X X
+n ???
+??? ??? ???
+Then, in deriving the confidence interval, we'd start out with:
+/
+X
+S n
+??????
+instead of:
+(0,1)
+/
+X
+N
+n
+???
+???
+???
+Then, to derive the confidence interval, in this case, we just need to know how:
+/
+X
+T
+S n
+??????
+???
+is distributed!
+How is
+/
+X
+T
+S n
+??????
+??? distributed?
+Given that the ratio is typically denoted by the capital letter T, we probably shouldn't be
+surprised that the ratio follows a T distribution!
+Theorem. If X1, X2, ..., Xn are normally distributed with mean ì and variance ó2, then:
+/
+X
+T
+S n
+??????
+???
+follows a T distribution with n ??? 1 degrees of freedom.
+Now that we have the distribution of
+/
+X
+T
+S n
+??????
+??? behind us, we can derive the confidence
+interval for a population mean in the realistic situation that ó is unknown.
+
+
+
+
+IMAGE!!
+
+
+
+
+Theorem. If X1, X2, ..., Xn are normally distributed random variables with mean ì and
+variance ó2, then a (1???á)100% confidence interval for the population mean ì is:
+X t /2 (S n) ??? ???
+This interval is often referred to as the "t-interval for the mean."
+The proof is very similar to that for the Z-interval for the mean. We start by drawing a picture of
+a T-distribution with n ??? 1 degrees of freedom:
+
+
+
+IMAGE 
+
+
+IMAGE
+
+
+IMAGE
+
+
+
+
+
+
+
+
+
+Now, let's take a look at an example!
+Example
+A random sample of 16 Americans yielded the following data on the number of pounds of beef
+consumed per year:
+118 115 125 110 112 130 117 112
+115 120 113 118 119 122 123 126
+What is the average number of pounds of beef consumed each year per person in the United
+States?
+
+
+
+
+
+
+Exercise 1. a) Show that the data follow normal distribution, since according to the above
+theorem states, in order for the t-interval for the mean to be appropriate, the data must follow a
+normal distribution, and b) calculate a 95% confidence interval for the mean.
+Non-normal Data
+So far, all of our discussion has been on finding a confidence interval for the population
+mean ì when the data are normally distributed. That is, the t-interval for ì (and Z-interval, for
+that matter) is derived assuming that the data X1, X2, ..., Xn are normally distributed. What
+happens if our data are skewed, and therefore clearly not normally distributed?
+Well, it is helpful to note that as the sample size n increases, the T ratio:
+/
+X
+T
+S n
+??????
+???
+approaches an approximate normal distribution regardless of the distribution of the original data.
+The implication, therefore, is that the t-interval for ì:
+/2, 1( ) a n
+s
+x t
+n
+??? ???
+and the Z-interval for ì:
+/2( ) a
+s
+x t
+n
+???
+(with the sample standard deviation s replacing the unknown population standard deviation ó!)
+yield similar results for large samples. This result suggests that we should adhere to the
+following guidelines in practice.
+In practice!
+
+
+IMAGE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Exercise 2
+A random sample of 64 guinea pigs yielded the following survival times (in days):
+
+IMAGE
+
+What is the mean survival time (in days) of the population of guinea pigs? (Data from K.
+Doksum, Annals of Statistics, 2(1974): 267-277.). Find the confidence interval that contains the
+mean survival time for the population of guinea pigs with 95% confident.
+
+
+```{r}
+#  ... as ipothesoume oti to sigma einai gnwsto..
+#      kai ta  X_i einai katanonika katanenhmena...
+set.seed(9.1)
+mu = 10
+sd = 5
+
+x <- rnorm(15, mu, sd)
+
+
+simple.eda(x)
+
+
+xbar <- mean(x)
+se   <- sd/sqrt(length(x))
+
+z <- (xbar - mu) / se
+z
+#[1] 0.06939382
+
+#  ... kai apo ena standard normal pinaka ,
+#      vlepoume oti afthn h metrisi xondrika
+#      mono 2.8% tou plithismou exei sample mean
+#      wste toso na parekklinei  apo to  mean tou plithismou (10)
+#      
+```
+
+
+
+
+
+
+
+Exercise 3
+For the population generated in section 1 of this document, a) create the sample of size 1000, b)
+compute the z-critical value using the qnorm R function, and compute the confidence interval
+using the z-value.
+The following code generates 25 confidence intervals and plots them. Discuss what you
+observed.
+set.seed(12) sample_size <- 1000
+intervals <- c() # Create and store 25 intervals for (sample in 1:25){ sample_ages <-
+sample(population_ages, size=sample_size) # Take a sample of 1000 ages
+sample_mean <- mean(sample_ages) # Get the sample mean
+z_critical <- qnorm(0.975) # Get the z-critical value*
+pop_stdev <- sd(population_ages) # Get the population standard deviation
+margin_of_error <- z_critical * (pop_stdev / sqrt(sample_size)) # Calculate margin of er ror
+confidence_interval <- c(sample_mean - margin_of_error, # Calculate the the interval
+sample_mean + margin_of_error)
+intervals <- c(intervals, confidence_interval) }
+interval_df <- data.frame(t(matrix(intervals,2,25))) # Store intervals as data frame
+library(ggplot2)
+# Plot confidence intervals and show the true mean
+my_plot <- ggplot(data=interval_df, aes(x=1:nrow(interval_df))) +
+geom_errorbar(aes(ymax = X2, ymin = X1)) + geom_point(aes(y=rowMeans(interval_df)),
+shape=1, size=3) + geom_abline(intercept=true_mean, slope=0,color="red",lwd=1) +
+ylab("Interval Range (Red Line=True Mean)") + xlab("Interval Number")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Exercise 4
+Take a new, smaller sample from the population used in exercise 3 and then create a confidence
+interval without the population standard deviation, using the t-distribution. Note: when using the
+t-distribution, you have to supply the degrees of freedom (df). For this type of one test, the
+degrees of freedom is equal to the sample size minus 1. If you have a large sample size, the tdistribution
+approaches the normal distribution. Compare the t-interval with z-interval. Use the
+t.test(sample) function to calculate the t-interval.
+
+
+
+
+
+Exercise 5
+We can also make a confidence interval for a point estimate of a population proportion. In this
+case, the margin of error equals:
+p(1 p)
+z
+n
+???
+???
+Where z is the z-critical value for our confidence level, p is the point estimate of the population proportion and n is the sample size. Calculate a 95% confidence interval for Hispanics according to the sample proportion 0.204.
+Note: As with the confidence interval for the mean, you can use a built in R function to get a confidence interval:
+prop.test(x=204, # Number of observations n=1000) # Total number of samples
+Apply this function and report the results.
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab05 !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+

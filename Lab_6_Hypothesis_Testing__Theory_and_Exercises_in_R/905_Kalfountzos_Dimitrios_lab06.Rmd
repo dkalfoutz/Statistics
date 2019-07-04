@@ -1,0 +1,1189 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab05 !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab05 !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lab 6 - Hypothesis Testing and the T-Test
+Point estimates and confidence intervals are basic inference tools that act as the foundation for
+another inference technique: statistical hypothesis testing. Statistical hypothesis testing is a
+framework for determining whether observed data deviates from what is expected. R contains an
+array of built in functions that make it easy to carry out hypothesis tests and analyze the results.
+1. Hypothesis Testing Basics
+Statistical hypothesis tests are based a statement called the null hypothesis that assumes nothing
+interesting is going on between whatever variables you are testing. The exact form of the null
+hypothesis varies from one type test to another: if you are testing whether groups differ, the null
+hypothesis states that the groups are the same. For instance, if you wanted to test whether the
+average age of voters in your home state differs from the national average, the null hypothesis would
+be that there is no difference between the average ages.
+The purpose of a hypothesis test is to determine whether the null hypothesis is likely to be true
+given sample data. If there is little evidence against the null hypothesis given the data, you accept
+the null hypothesis. If the null hypothesis is unlikely given the data, you might reject the null in favor
+of the alternative hypothesis: that something interesting is going on. The exact form of the alternative
+hypothesis will depend on the specific test you are carrying out. Continuing with the example above,
+the alternative hypothesis would be that the average age of voters in your state does in fact differ
+from the national average.
+Once you have the null and alternative hypothesis in hand, you choose a significance level (often
+denoted by the Greek letter á.). The significance level is a probability threshold that determines
+when you reject the null hypothesis. After carrying out a test, if the probability of getting a result as
+extreme as the one you observe due to chance is lower than the significance level, you reject the
+null hypothesis in favor of the alternative. This probability of seeing a result as extreme or more
+extreme than the one observed is known as the p-value.
+The t-test is a statistical test used to determine whether a numeric data sample of differs significantly
+from the population or whether two samples differ from one another.
+2. Testing a population parameter
+Consider a simple survey. You ask 100 people (randomly chosen) and 42 say ``yes'' to your question.
+Does this support the hypothesis that the true proportion is 50%?
+To answer this, we set up a test of hypothesis. The null hypothesis, denoted H0 is that p=.5, the
+alternative hypothesis, denoted HA, in this example would be p ??? 0.5. This is a so called ``two-sided''
+alternative. To test the assumptions, we use the function prop.test as with the confidence interval
+calculation. Here are the commands
+
+
+```{r}
+library(UsingR)
+prop.test(42,100,p=.5)
+#1-sample proportions test with continuity correction
+#data: 42 out of 100, null probability 0.5
+#X-squared = 2.25, df = 1, p-value = 0.1336
+#alternative hypothesis: true p is not equal to 0.5
+#95 percent confidence interval:
+#0.3233236 0.5228954
+#sample estimates:
+p
+#0.42
+```
+
+
+Note the p-value of 0.1336. The p-value reports how likely we are to see this data or worse assuming the
+null hypothesis. The notion of worse, is implied by the alternative hypothesis. In this example, the
+alternative is two-sided as too small a value or too large a value or the test statistic is consistent with HA.
+In particular, the p-value is the probability of 42 or fewer or 58 or more answer ``yes'' when the chance a
+person will answer ``yes'' is fifty-fifty.
+Now, the p-value is not so small as to make an observation of 42 seem unreasonable in 100 samples
+assuming the null hypothesis. Thus, one would ``accept'' the null hypothesis.
+Next, we repeat, only suppose we ask 1000 people and 420 say yes. Does this still support the null
+hypothesis that p=0.5?
+
+
+```{r}
+prop.test(420,1000,p=.5)
+#1-sample proportions test with continuity correction
+#data: 420 out of 1000, null probability 0.5
+#X-squared = 25.281, df = 1, p-value = 4.956e-07
+#alternative hypothesis: true p is not equal to 0.5
+#95 percent confidence interval:
+#0.3892796 0.4513427
+#sample estimates:
+p
+#0.42
+```
+
+Now the p-value is tiny (that's 0.0000004956!) and the null hypothesis is not supported. That is, we
+``reject'' the null hypothesis. This illustrates the the p value depends not just on the ratio, but also n. In
+particular, it is because the standard error of the sample average gets smaller as n gets larger.
+
+
+
+One-Sample T-Test
+A one-sample t-test checks whether a sample mean differs from the population mean. Let's create
+some dummy age data for the population of voters in the entire country and a sample of voters in
+Minnesota and test the whether the average age of voters Minnesota differs from the population:
+
+
+```{r}
+set.seed(12)
+population_ages <- c(rexp(1000000,0.015)+18, # Generate dummy age data for
+#population
+rpois(500000,20)+18,
+rpois(500000,32.5)+18,
+rpois(500000,45)+18)
+population_ages <- ifelse(population_ages<100, population_ages, population_ages%%100+18)
+true_mean <- mean(population_ages) # Check the population mean
+true_mean
+set.seed(12)
+minnesota_ages <- c(rexp(100,0.015)+18, # Generate dummy sample age data
+rpois(50,15)+18,
+rpois(50,25)+18,
+rpois(50,35)+18)
+minnesota_ages <- ifelse(minnesota_ages<100, minnesota_ages, minnesota_ages%%
+100+18)
+mean(minnesota_ages)
+#Out[1]:
+#51.2188371860945
+#Out[1]:
+#48.2348502354331
+```
+
+
+
+Notice that we used a slightly different combination of distributions to generate the sample data for
+Minnesota, so we know that the two means are different.
+Let's conduct a t-test at a 95% confidence level and see if it correctly rejects the null hypothesis that
+the sample comes from the same distribution as the population. To conduct a t-test, we can use the
+same t.test() function we used last time to find confidence intervals:
+
+```{r}
+t.test(x = minnesota_ages, # Sample data
+mu = true_mean, # The true population mean
+alternative = "two.sided", # Conduct two sided test*
+conf.level = 0.95, # Desired level of statistical significance)
+```
+Out[2]:
+One Sample t-test
+data: minnesota_ages
+t = -2.4484, df = 249, p-value = 0.01504
+alternative hypothesis: true mean is not equal to 51.21884
+95 percent confidence interval:
+45.8345 50.6352
+sample estimates:
+mean of x
+48.23485
+*Note: the alternative hypothesis can be that the sample mean is strictly less than, strictly greater
+than or not equal to the population parameter. For the "not equal to" hypothesis, we use a "two
+sided" test because an extreme test result in either direction would be evidence that the sample
+mean is significantly different from the population mean.
+
+
+The test result shows the test statistic "t" is equal to -2.4484. This test statistic tells us how much the
+sample mean deviates from the null hypothesis. If the t-statistic lies outside the quantiles of the tdistribution
+corresponding to our confidence level and degrees of freedom, we reject the null
+hypothesis. We can check the quantiles with qt():
+
+
+```{r}
+qt(p=0.025, df=249) # Get the lower tail quantile
+qt(p=0.975, df=249) # Get the upper tail quantile
+```
+
+
+Furthermore, we can calculate the chances of seeing a result as extreme as the one we observed
+(known as the p-value) by passing the t-statistic in as the quantile to the pt() function:
+
+```{r}
+pt(q=-2.4484, df=249) * 2 # We multiply by 2 because we are doing a two-tailed test
+```
+
+
+Notice this value is the same as the p-value listed in the original t-test output. A p-value of 0.01504
+means we'd expect to see data as extreme as our sample due to chance about 1.5% of the time if
+the null hypothesis was true. In this case, the p-value is lower than our significance level á (equal to
+1-conf.level or 0.05) so we should reject the null hypothesis. Also notice that the 95% confidence
+interval in the output not does capture the true population mean of 51.2188.
+Let's run the same test but change our desired confidence level to 99%:
+
+```{r}
+t.test(x = minnesota_ages,
+mu = true_mean,
+alternative = "two.sided",
+conf.level = 0.99) # Use a higher confidence level
+
+```
+
+Now let's calculate the upper and lower quantile bounds for a 99% confidence level:
+```{r}
+qt(p=0.005, df=249) # Get the lower tail quantile
+qt(p=0.995, df=249) # Get the upper tail quantile
+```
+
+
+With a higher confidence level, we construct a wider confidence interval and increase the chances
+that it captures to true mean, thus making it less likely that we'll reject the null hypothesis. In this
+case, the test statistic -2.4484 falls within the quantile bounds for our test so the p-value of 0.015 is
+greater than our significance level of 0.01 and we fail to reject the null hypothesis.
+Two-Sample T-Test
+A two-sample t-test investigates whether the means of two independent data samples differ from
+one another. In a two-sample test, the null hypothesis is that the means of both groups are the
+same. Unlike the one sample-test where we test against a known population parameter, the two
+sample test only involves sample means. You can conduct a two-sample t-test by passing a second
+data sample into the t.test() function. Let's generate a sample of voter age data for Wisconsin and
+test it against the sample we made earlier:
+
+```{r}
+set.seed(12)
+wisconsin_ages <- c(rexp(50,0.015)+18, # Generate more dummy sample age data
+rpois(50,20)+18,
+rpois(50,32.5)+18,
+rpois(50,45)+18)
+wisconsin_ages <- ifelse(wisconsin_ages<100, wisconsin_ages, wisconsin_ages%%
+100+18)
+```
+
+
+```{r}
+t.test(x=minnesota_ages, # Conduct a the two sample test*
+y=wisconsin_ages,
+conf.level=0.95)
+```
+
+
+*Note: the degrees of freedom for a two-sample test are derived from a formula based on the size
+and variance of each sample intended to correct for samples with unequal variance.
+The test yields a p-value of 0.02692, which means there is a 2.7% chance we'd see sample data this
+far apart if the two groups tested are actually identical. In this case, we'd reject that hypothesis, since
+2.7% is lower than our significance level of 5%.
+If we changed our confidence level to 99% we would fail to reject the null hypothesis because the pvalue
+is greater than 0.01.
+
+
+
+Paired T-Test
+The two sample t-test is designed for testing differences between independent groups. In some
+cases, you might be interested in testing differences between samples of the same group at different
+points in time. For instance, a hospital might want to test whether a weight-loss drug works by
+checking the weights of the same group patients before and after treatment. A paired t-test lets you
+check whether the means of samples from the same group differ.
+We can conduct a paired t-test by passing two paired data samples to the t.test() function and
+including the argument paired=TRUE. Let's generate some dummy weight data and run a paired ttest
+on it. Note that R creates pairings based on the order of the vectors you pass in, so individuals
+should be in the same order in both vectors.
+
+```{r}
+set.seed(80)
+before_treatment_weights <- rnorm(100,250,30) # Generate weights with mean 250lbs
+after_treatment_weights <- (before_treatment_weights + rnorm(100,-1.25,5))
+weight_df <- data.frame(before=before_treatment_weights, # Pair the data in a data frame
+after=after_treatment_weights,
+change=after_treatment_weights-before_treatment_weights)
+summary(weight_df) # Check a summary of the data
+```
+
+The summary shows that patients lost about 1.2 pounds on average after treatment. Let's conduct a
+paired t-test to see whether this difference is significant at a 95% confidence level:
+
+```{r}
+t.test(before_treatment_weights,
+after_treatment_weights,
+conf.level= 0.95,
+paired=TRUE)
+```
+
+The p-value in the test output shows that the chances of seeing this large of a difference between
+samples due to chance is less than 1%.
+
+
+Type I and Type II Error
+The result of a statistical hypothesis test and the corresponding decision of whether to reject or
+accept the null hypothesis is not infallible. A test provides evidence for or against the null hypothesis
+and then you decide whether to accept or reject it based on that evidence, but the evidence may
+lack the strength to arrive at the correct conclusion. Incorrect conclusions made from hypothesis
+tests fall in one of two categories: type I error and type II error.
+Type I error describes a situation where you reject the null hypothesis when it is actually true. This
+type of error is also known as a "false positive" or "false hit". The type 1 error rate is equal to the
+significance level á, so setting a higher confidence level (and therefore lower alpha) reduces the
+chances of getting a false positive.
+Type II error describes a situation where you fail to reject the null hypothesis when it is actually false.
+Type II error is also known as a "false negative" or "miss". The higher your confidence level, the
+more likely you are to make a type II error.
+You can find the type II error rate for detecting a difference between a given distribution and a
+second test distribution with a known mean and standard deviation using the power.t.test() function.
+This function finds the power of a t-test, which is probability that the test rejects the null hypothesis when the alternative is true. The type II error rate is equal to 1-power. Let's use this function to check
+the type II error rate of our paired t-test:
+
+```{r}
+power.t.test(n= 100, # Size of the sample
+delta = 1.25, # Assumed mean (avg difference) for the distribution
+sd= 5, # Assumed standard deviation for the distribution
+sig.level= 0.05, # Significance level
+type="paired") # t-test type
+```
+
+
+The output shows that the power of our paired t-test is 0.6969757, so the type II error is 1-0.6969757
+or approximately 30%. Since the true difference between the groups is only 1.25 pounds we have a
+fairly high probability of failing to detect the difference.
+
+Wrap Up
+The t-test is a powerful tool for investigating the differences between sample and population means
+and R has nice built in functions for conducting t-tests.
+
+
+
+
+
+
+Appendix: P-value approach
+The P-value approach involves determining "likely" or "unlikely" by determining the probability —
+assuming the null hypothesis were true — of observing a more extreme test statistic in the direction
+of the alternative hypothesis than the one observed. If the P-value is small, say less than (or equal to)
+á, then it is "unlikely." And, if the P-value is large, say more than á, then it is "likely."
+If the P-value is less than (or equal to) á, then the null hypothesis is rejected in favor of the
+alternative hypothesis. And, if the P-value is greater than á, then the null hypothesis is not rejected.
+Specifically, the four steps involved in using the P-value approach to conducting any hypothesis test
+are:
+1. Specify the null and alternative hypotheses.
+2. Using the sample data and assuming the null hypothesis is true, calculate the value of the test
+statistic. Again, to conduct the hypothesis test for the population mean ì, we use the tstatistic
+* x
+t
+s n
+??????
+??? which follows a t-distribution with n - 1 degrees of freedom.
+3. Using the known distribution of the test statistic, calculate the P-value: "If the null hypothesis is true,
+what is the probability that we'd observe a more extreme test statistic in the direction of the
+alternative hypothesis than we did?" (Note how this question is equivalent to the question answered
+in criminal trials: "If the defendant is innocent, what is the chance that we'd observe such extreme
+criminal evidence?")
+4. Set the significance level, á, the probability of making a Type I error to be small — 0.01, 0.05, or
+0.10. Compare the P-value to á. If the P-value is less than (or equal to) á, reject the null hypothesis
+in favor of the alternative hypothesis. If the P-value is greater than á, do not reject the null
+hypothesis.
+In our example concerning the mean grade point average, suppose that our random sample of n = 15
+students majoring in mathematics yields a test statistic t* equaling 2.5. Since n = 15, our test
+statistic t* has n - 1 = 14 degrees of freedom. Also, suppose we set our significance level á at 0.05, so
+that we have only a 5% chance of making a Type I error.
+The P-value for conducting the right-tailed test H0 : ì = 3 versus HA : ì > 3 is the probability that we
+would observe a test statistic greater than t* = 2.5 if the population mean really were 3. Recall that
+probability equals the area under the probability curve. The P-value is therefore the area under a tn -
+1 = t14 curve and to the right of the test statistic t* = 2.5. It can be shown using statistical software
+that the P-value is 0.0127:
+The P-value, 0.0127, tells us it is "unlikely" that we would observe such an extreme test statistic t* in
+the direction of HA if the null hypothesis were true. Therefore, our initial assumption that the null
+hypothesis is true must be incorrect. That is, since the P-value, 0.0127, is less than á = 0.05, we reject
+the null hypothesis H0 : ì = 3 in favor of the alternative hypothesis HA : ì > 3.
+Note that we would not reject H0 : ì = 3 in favor of HA : ì > 3 if we lowered our willingness to make
+a Type I error to á = 0.01 instead, as the P-value, 0.0127, is then greater than á = 0.01.
+In our example concerning the mean grade point average, suppose that our random sample of n = 15
+students majoring in mathematics yields a test statistic t* instead equaling -2.5. The P-value for
+conducting the left-tailed test H0 : ì = 3 versus HA : ì < 3 is the probability that we would observe a
+test statistic less than t* = -2.5 if the population mean ì really were 3. The P-value is therefore the
+area under a tn- 1 = t14 curve and to the left of the test statistic t* = -2.5. It can be shown using
+statistical software that the P-value is 0.0127:
+The P-value, 0.0127, tells us it is "unlikely" that we would observe such an extreme test statistic t* in
+the direction of HA if the null hypothesis were true. Therefore, our initial assumption that the null
+hypothesis is true must be incorrect. That is, since the P-value, 0.0127, is less than á = 0.05, we reject
+the null hypothesis H0 : ì = 3 in favor of the alternative hypothesis HA : ì < 3.
+Note that we would not reject H0 : ì = 3 in favor of HA : ì < 3 if we lowered our willingness to make
+a Type I error to á = 0.01 instead, as the P-value, 0.0127, is then greater than á = 0.01.
+In our example concerning the mean grade point average, suppose again that our random sample
+of n = 15 students majoring in mathematics yields a test statistic t* instead equaling -2.5. The P-value
+for conducting the two-tailed test H0 : ì = 3 versus HA : ì ??? 3 is the probability that we would
+observe a test statistic less than -2.5 or greater than 2.5 if the population mean ì really were 3. That
+is, the two-tailed test requires taking into account the possibility that the test statistic could fall into
+either tail (and hence the name "two-tailed" test). The P-value is therefore the area under a tn -
+1 = t14 curve to the left of -2.5 and to the right of the 2.5. It can be shown using statistical software
+that the P-value is 0.0127 + 0.0127, or 0.0254:
+Note that the P-value for a two-tailed test is always two times the P-value for either of the one-tailed
+tests. The P-value, 0.0254, tells us it is "unlikely" that we would observe such an extreme test
+statistic t* in the direction of HA if the null hypothesis were true. Therefore, our initial assumption
+that the null hypothesis is true must be incorrect. That is, since the P-value, 0.0254, is less than á =
+0.05, we reject the null hypothesis H0 : ì = 3 in favor of the alternative hypothesis HA : ì ??? 3.
+Note that we would not reject H0 : ì = 3 in favor of HA : ì ??? 3 if we lowered our willingness to make
+a Type I error to á = 0.01 instead, as the P-value, 0.0254, is then greater than á = 0.01.
+Now that we have reviewed the critical value and P-value approach procedures for each of three
+possible hypotheses, let's look at three new examples — one of a right-tailed test, one of a left-tailed
+test, and one of a two-tailed test.
+
+
+
+
+
+
+
+EXERCISES
+
+
+Lab 6: Hypothesis Testing – Type I Error
+Researchers retain or reject hypothesis based on measurements of observed samples. The
+decision is often based on a statistical mechanism called hypothesis testing. A type I error is
+the mishap of falsely rejecting a null hypothesis when the null hypothesis is true. The probability
+of committing a type I error is called the significance level of the hypothesis testing, and is
+denoted by the Greek letter á .
+The following exercises concern hypothesis testing in R with possible type I error.
+Exercise 1: Lower Tail Test of Population Mean with Known Variance
+The null hypothesis of the lower tail test of the population mean can be expressed as follows:
+where ì0 is a hypothesized lower bound of the true population mean ì.
+Let us define the test statistic z in terms of the sample mean, the sample size and the population
+standard deviation ó :
+Then the null hypothesis of the lower tail test is to be rejected if z ??????zá , where zá is the 100(1 ???
+á) percentile of the standard normal distribution is the critical value and can be computed by the
+R function qnorm(1-alpha).
+Problem
+Suppose the manufacturer claims that the mean lifetime of a light bulb is more than 10,000
+hours. In a sample of 30 light bulbs, it was found that they only last 9,900 hours on average.
+Assume the population standard deviation is 120 hours. At .05 significance level, can we reject
+the claim by the manufacturer?
+
+Solution
+The null hypothesis is that ì ??? 10000. We begin with computing the test statistic.
+
+```{r}
+library(UsingR)
+xbar = 9900            # sample mean 
+mu0 = 10000            # hypothesized value 
+sigma = 120            # population standard deviation 
+n = 30                 # sample size 
+z = (xbar ??? mu0)/(sigma/sqrt(n)) 
+z                      # test statistic 
+```
+[1] ???4.5644
+
+library(UsingR)
+xbar = 9900            # sample mean 
+mu0 = 10000            # hypothesized value 
+sigma = 120            # population standard deviation 
+n = 30                 # sample size 
+z = (xbar ??? mu0)/(sigma/sqrt(n)) 
+z                      # test statistic 
+
+We then compute the critical value at .05 significance level.
+```{r}
+library(UsingR)
+alpha = .05 
+z.alpha = qnorm(1???alpha) 
+???z.alpha               # critical value 
+[1] ???1.6449
+```
+{r}
+library(UsingR)
+alpha = .05 
+z.alpha = qnorm(1???alpha) 
+???z.alpha               # critical value 
+[1] ???1.6449
+
+
+The test statistic -4.5644 is less than the critical value of -1.6449. Hence, at .05 significance level, we reject the claim that mean lifetime of a light bulb is above 10,000 hours.
+
+
+Enallaktiki lysh
+
+Instead of using the critical value, we apply the pnorm function to compute the lower tail p-value of the test statistic. As it turns out to be less than the .05 significance level, we reject the null hypothesis that ì ??? 10000.
+
+```{r}
+pval = pnorm(z)
+pval                   # lower tail p???value 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+Exercise 2: Upper Tail Test of Population Mean with Known Variance
+The null hypothesis of the upper tail test of the population mean can be expressed as follows:
+where ì0 is a hypothesized upper bound of the true population mean ì.
+Let us define the test statistic z in terms of the sample mean, the sample size and the population
+standard deviation ó :
+Then the null hypothesis of the upper tail test is to be rejected if z ??? zá , where zá is the 100(1 ???
+á) percentile of the standard normal distribution.
+Problem
+Suppose the food label on a cookie bag states that there is at most 2 grams of saturated fat in a
+single cookie. In a sample of 35 cookies, it is found that the mean amount of saturated fat per
+cookie is 2.1 grams. Assume that the population standard deviation is 0.25 grams. At .05
+significance level, can we reject the claim on food label?
+
+
+Solution
+The null hypothesis is that ì ??? 2. We begin with computing the test statistic.
+
+
+```{r}
+xbar = 2.1             # sample mean 
+mu0 = 2                # hypothesized value 
+sigma = 0.25           # population standard deviation 
+n = 35                 # sample size 
+z = (xbar???mu0)/(sigma/sqrt(n)) 
+z                      # test statistic 
+#[1] 2.3664
+# Error: unexpected input in "z = (xbar\"
+```
+[1] 2.3664
+
+
+
+> xbar = 2.1             # sample mean 
+> mu0 = 2                # hypothesized value 
+> sigma = 0.25           # population standard deviation 
+> n = 35                 # sample size 
+> z = (xbar???mu0)/(sigma/sqrt(n)) 
+> z                      # test statistic 
+#[1] 2.3664
+# Error: unexpected input in "z = (xbar\"
+
+We then compute the critical value at .05 significance level.
+ (((((Grafw kapoia epilegmena tmhmata tou kwdika ws sxolia..'h ws kanoniko
+ keimeno, eksaitias toy oti moy petaei kapoia bugs, profanws logw provlimatos
+ se kapoies mathimatikes vivliothikes, enw se allo pc den mou emfanize kanena
+ apolytws provlhma)))))
+ 
+> alpha = .05 
+> z.alpha = qnorm(1???alpha) 
+> z.alpha                # critical value 
+[1] 1.6449
+
+```{r}
+alpha = .05 
+z.alpha = qnorm(1???alpha) 
+z.alpha                # critical value 
+
+```
+Error: unexpected input in "z.alpha = qnorm(1\"
+[1] 1.6449
+
+
+Answer
+The test statistic 2.3664 is greater than the critical value of 1.6449. Hence, at .05 significance level, we reject the claim that there is at most 2 grams of saturated fat in a cookie.
+
+Alternative Solution
+Instead of using the critical value, we apply the pnorm function to compute the upper tail p-value of the test statistic. As it turns out to be less than the .05 significance level, we reject the null hypothesis that ì ??? 2.
+```{r}
+pval = pnorm(z, lower.tail=FALSE) 
+pval                   # upper tail p???value 
+
+```
+
+
+
+
+
+
+
+Exercise 3: Two-Tailed Test of Population Mean with Known Variance
+The null hypothesis of the two-tailed test of the population mean can be expressed as follows:
+where ì0 is a hypothesized value of the true population mean ì.
+Let us define the test statistic z in terms of the sample mean, the sample size and the population
+standard deviation ó :
+Then the null hypothesis of the two-tailed test is to be rejected if z ??????zá???2 or z ??? zá???2 , where zá???2 is
+the 100(1 ??? á???2) percentile of the standard normal distribution.
+Problem
+Suppose the mean weight of King Penguins found in an Antarctic colony last year was 15.4 kg.
+In a sample of 35 penguins same time this year in the same colony, the mean penguin weight is
+14.6 kg. Assume the population standard deviation is 2.5 kg. At .05 significance level, can we
+reject the null hypothesis that the mean penguin weight does not differ from last year?
+For the computation of critical value we use the qnorm(1???alpha/2). Why?
+
+
+Solution
+The null hypothesis is that ì = 15.4. We begin with computing the test statistic.
+
+> xbar = 14.6            # sample mean 
+> mu0 = 15.4             # hypothesized value 
+> sigma = 2.5            # population standard deviation 
+> n = 35                 # sample size 
+> z = (xbar???mu0)/(sigma/sqrt(n)) 
+> z                      # test statistic 
+#[1] ???1.8931
+
+```{r}
+xbar = 14.6            # sample mean 
+mu0 = 15.4             # hypothesized value 
+sigma = 2.5            # population standard deviation 
+n = 35                 # sample size 
+z = (xbar???mu0)/(sigma/sqrt(n)) 
+z                      # test statistic 
+#[1] ???1.8931
+
+```
+Error: unexpected input in "z = (xbar\"
+# [1] ???1.8931
+We then compute the critical values at .05 significance level.
+
+> alpha = .05 
+> z.half.alpha = qnorm(1???alpha/2) 
+> c(???z.half.alpha, z.half.alpha) 
+[1] ???1.9600  1.9600
+
+
+```{r}
+alpha = .05 
+z.half.alpha = qnorm(1???alpha/2) 
+c(???z.half.alpha, z.half.alpha) 
+#[1] ???1.9600  1.9600
+
+```
+Error: unexpected input in "z.half.alpha = qnorm(1\"
+#[1] ???2.0322  2.0322
+
+
+
+Answer
+The test statistic -1.8931 lies between the critical values -2.0322, and 2.0322. Hence, at .05 significance level, we do not reject the null hypothesis that the mean penguin weight does not differ from last year.
+
+Alternative Solution
+Instead of using the critical value, we apply the pt function to compute the two-tailed p-value of the test statistic. It doubles the lower tail p-value as the sample mean is less than the hypothesized value. Since it turns out to be greater than the .05 significance level, we do not reject the null hypothesis that ì = 15.4.
+
+> pval = 2 ??? pt(t, df=n???1)  # lower tail 
+> pval                      # two???tailed p???value 
+
+
+```{r}
+pval = 2 ??? pt(t, df=n???1)  # lower tail 
+pval                      # two???tailed p???value 
+
+```
+Error: unexpected input in "pval = 2 \"
+[1] 0.066876
+
+
+
+
+
+
+
+
+
+
+Exercise 4: Lower Tail Test of Population Mean with Unknown Variance
+The null hypothesis of the lower tail test of the population mean can be expressed as follows:
+where ì0 is a hypothesized lower bound of the true population mean ì.
+Let us define the test statistic t in terms of the sample mean, the sample size and the sample
+standard deviation s :
+Then the null hypothesis of the lower tail test is to be rejected if t ??????tá , where tá is the 100(1 ???
+á) percentile of the Student t distribution with n ??? 1 degrees of freedom. Use the R function qt.
+Problem
+Suppose the manufacturer claims that the mean lifetime of a light bulb is more than 10,000
+hours. In a sample of 30 light bulbs, it was found that they only last 9,900 hours on average.
+Assume the sample standard deviation is 125 hours. At .05 significance level, can we reject the
+claim by the manufacturer?
+
+
+Solution
+The null hypothesis is that ì ??? 10000. We begin with computing the test statistic.
+
+> xbar = 9900            # sample mean 
+> mu0 = 10000            # hypothesized value 
+> s = 125                # sample standard deviation 
+> n = 30                 # sample size 
+> t = (xbar???mu0)/(s/sqrt(n)) 
+> t                      # test statistic 
+[1] ???4.3818
+
+
+```{r}
+xbar = 9900            # sample mean 
+mu0 = 10000            # hypothesized value 
+s = 125                # sample standard deviation 
+n = 30                 # sample size 
+t = (xbar???mu0)/(s/sqrt(n)) 
+t                      # test statistic 
+
+```
+Error: unexpected input in "t = (xbar\"
+#[1] ???4.3818
+
+
+We then compute the critical value at .05 significance level.
+
+> alpha = .05 
+> t.alpha = qt(1???alpha, df=n???1) 
+> ???t.alpha               # critical value 
+[1] ???1.6991
+
+```{r}
+alpha = .05 
+t.alpha = qt(1???alpha, df=n???1) 
+???t.alpha               # critical value 
+
+```
+Error: unexpected input in "t.alpha = qt(1\"
+#[1] ???1.6991
+
+
+The test statistic -4.3818 is less than the critical value of -1.6991. Hence, at .05 significance level, we can reject the claim that mean lifetime of a light bulb is above 10,000 hours.
+
+Alternative Solution
+Instead of using the critical value, we apply the pt function to compute the lower tail p-value of the test statistic. As it turns out to be less than the .05 significance level, we reject the null hypothesis that ì ??? 10000.
+
+> pval = pt(t, df=n???1) 
+> pval                   # lower tail p???value 
+[1] 7.035e???05
+
+```{r}
+pval = pt(t, df=n???1) 
+pval                   # lower tail p???value 
+
+```
+Error: unexpected input in "pval = pt(t, df=n\"
+#[1] 7.035e???05
+
+
+
+
+
+
+
+
+
+
+
+
+
+Exercise 5: Upper Tail Test of Population Mean with Unknown Variance
+The null hypothesis of the upper tail test of the population mean can be expressed as follows:
+where ì0 is a hypothesized upper bound of the true population mean ì.
+Let us define the test statistic t in terms of the sample mean, the sample size and the sample
+standard deviation s :
+Then the null hypothesis of the upper tail test is to be rejected if t ??? tá , where tá is the 100(1 ??? á)
+percentile of the Student t distribution with n ??? 1 degrees of freedom.
+Problem
+Suppose the food label on a cookie bag states that there is at most 2 grams of saturated fat in a
+single cookie. In a sample of 35 cookies, it is found that the mean amount of saturated fat per
+cookie is 2.1 grams. Assume that the sample standard deviation is 0.3 gram. At .05 significance
+level, can we reject the claim on food label?
+
+
+Solution
+The null hypothesis is that ì ??? 2. We begin with computing the test statistic.
+
+> xbar = 2.1             # sample mean 
+> mu0 = 2                # hypothesized value 
+> s = 0.3                # sample standard deviation 
+> n = 35                 # sample size 
+> t = (xbar???mu0)/(s/sqrt(n)) 
+> t                      # test statistic 
+[1] 1.9720
+
+```{r}
+xbar = 2.1             # sample mean 
+mu0 = 2                # hypothesized value 
+s = 0.3                # sample standard deviation 
+n = 35                 # sample size 
+t = (xbar???mu0)/(s/sqrt(n)) 
+t                      # test statistic 
+
+```
+Error: unexpected input in "t = (xbar\"
+[1] 1.9720
+
+
+We then compute the critical value at .05 significance level.
+
+> alpha = .05 
+> t.alpha = qt(1???alpha, df=n???1) 
+> t.alpha                # critical value 
+[1] 1.6991
+
+```{r}
+alpha = .05 
+t.alpha = qt(1???alpha, df=n???1) 
+t.alpha                # critical value 
+
+```
+Error: unexpected input in "t.alpha = qt(1\"
+[1] 1.6991
+
+
+Answer
+The test statistic 1.9720 is greater than the critical value of 1.6991. Hence, at .05 significance level, we can reject the claim that there is at most 2 grams of saturated fat in a cookie.
+
+Alternative Solution
+Instead of using the critical value, we apply the pt function to compute the upper tail p-value of the test statistic. As it turns out to be less than the .05 significance level, we reject the null hypothesis that ì ??? 2.
+
+> pval = pt(t, df=n???1, lower.tail=FALSE) 
+> pval                   # upper tail p???value 
+[1] 0.028393
+
+```{r}
+pval = pt(t, df=n???1, lower.tail=FALSE) 
+pval                   # upper tail p???value 
+
+```
+Error: unexpected input in "pval = pt(t, df=n\"
+[1] 0.028393
+
+
+
+
+
+
+Exercise 6: Two-Tailed Test of Population Mean with Unknown Variance
+The null hypothesis of the two-tailed test of the population mean can be expressed as follows:
+where ì0 is a hypothesized value of the true population mean ì.
+Let us define the test statistic t in terms of the sample mean, the sample size and the sample
+standard deviation s :
+Then the null hypothesis of the two-tailed test is to be rejected if t ??????tá???2 or t ??? tá???2 , where tá???2 is
+the 100(1 ??? á) percentile of the Student t distribution with n ??? 1 degrees of freedom.
+Problem
+Suppose the mean weight of King Penguins found in an Antarctic colony last year was 15.4 kg.
+In a sample of 35 penguins same time this year in the same colony, the mean penguin weight is
+14.6 kg. Assume the sample standard deviation is 2.5 kg. At .05 significance level, can we reject
+the null hypothesis that the mean penguin weight does not differ from last year?
+
+
+Solution
+The null hypothesis is that ì = 15.4. We begin with computing the test statistic.
+
+> xbar = 14.6            # sample mean 
+> mu0 = 15.4             # hypothesized value 
+> s = 2.5                # sample standard deviation 
+> n = 35                 # sample size 
+> t = (xbar???mu0)/(s/sqrt(n)) 
+> t                      # test statistic 
+[1] ???1.8931
+
+```{r}
+xbar = 14.6            # sample mean 
+mu0 = 15.4             # hypothesized value 
+s = 2.5                # sample standard deviation 
+n = 35                 # sample size 
+t = (xbar???mu0)/(s/sqrt(n)) 
+t                      # test statistic 
+
+```
+Error: unexpected input in "t = (xbar\"
+[1] ???1.8931
+
+
+We then compute the critical values at .05 significance level.
+
+> alpha = .05 
+> t.half.alpha = qt(1???alpha/2, df=n???1) 
+> c(???t.half.alpha, t.half.alpha) 
+[1] ???2.0322  2.0322
+
+```{r}
+alpha = .05 
+t.half.alpha = qt(1???alpha/2, df=n???1) 
+c(???t.half.alpha, t.half.alpha) 
+
+```
+Error: unexpected input in "t.half.alpha = qt(1\"
+[1] ???2.0322  2.0322
+
+
+Answer
+The test statistic -1.8931 lies between the critical values -2.0322, and 2.0322. Hence, at .05 significance level, we do not reject the null hypothesis that the mean penguin weight does not differ from last year.
+
+Alternative Solution
+Instead of using the critical value, we apply the pt function to compute the two-tailed p-value of the test statistic. It doubles the lower tail p-value as the sample mean is less than the hypothesized value. Since it turns out to be greater than the .05 significance level, we do not reject the null hypothesis that ì = 15.4.
+
+> pval = 2 ??? pt(t, df=n???1)  # lower tail 
+> pval                      # two???tailed p???value 
+[1] 0.066876
+
+```{r}
+pval = 2 ??? pt(t, df=n???1)  # lower tail 
+pval                      # two???tailed p???value 
+
+```
+Error: unexpected input in "pval = 2 \"
+[1] 0.066876
+
+
+
+
+
+
+
+
+Exercise 7: Lower Tail Test of Population Proportion
+The null hypothesis of the lower tail test about population proportion can be expressed as
+follows:
+where p0 is a hypothesized lower bound of the true population proportion p.
+Let us define the test statistic z in terms of the sample proportion and the sample size:
+Then the null hypothesis of the lower tail test is to be rejected if z ??????zá , where zá is the 100(1 ???
+á) percentile of the standard normal distribution.
+Problem
+Suppose 60% of citizens voted in last election. 85 out of 148 people in a telephone survey said
+that they voted in current election. At 0.5 significance level, can we reject the null hypothesis
+that the proportion of voters in the population is above 60% this year?
+
+
+
+Solution
+The null hypothesis is that p ??? 0.6. We begin with computing the test statistic.
+
+> pbar = 85/148          # sample proportion 
+> p0 = .6                # hypothesized value 
+> n = 148                # sample size 
+> z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+> z                      # test statistic 
+[1] ???0.6376
+
+
+```{r}
+pbar = 85/148          # sample proportion 
+p0 = .6                # hypothesized value 
+n = 148                # sample size 
+z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+z                      # test statistic 
+
+```
+Error: unexpected input in "z = (pbar\"
+[1] ???0.6376
+
+
+We then compute the critical value at .05 significance level.
+
+> alpha = .05 
+> z.alpha = qnorm(1???alpha) 
+> ???z.alpha               # critical value 
+[1] ???1.6449
+
+```{r}
+alpha = .05 
+z.alpha = qnorm(1???alpha) 
+???z.alpha               # critical value 
+
+```
+Error: unexpected input in "z.alpha = qnorm(1\"
+[1] ???1.6449
+
+
+Answer
+The test statistic -0.6376 is not less than the critical value of -1.6449. Hence, at .05 significance level, we do not reject the null hypothesis that the proportion of voters in the population is above 60% this year.
+
+Alternative Solution 
+Instead of using the critical value, we apply the pnorm function to compute the lower tail p-value of the test statistic. As it turns out to be greater than the .05 significance level, we do not reject the null hypothesis that p ??? 0.6.
+
+> pval = pnorm(z) 
+> pval                   # lower tail p???value 
+
+
+```{r}
+pval = pnorm(z) 
+pval                   # lower tail p???value 
+```
+
+
+
+
+
+
+
+
+
+Exercise 8: Upper Tail Test of Population Proportion
+The null hypothesis of the upper tail test about population proportion can be expressed as
+follows:
+where p0 is a hypothesized upper bound of the true population proportion p.
+Let us define the test statistic z in terms of the sample proportion and the sample size:
+Then the null hypothesis of the upper tail test is to be rejected if z ??? zá , where zá is the 100(1 ???
+á) percentile of the standard normal distribution.
+Problem
+Suppose that 12% of apples harvested in an orchard last year was rotten. 30 out of 214 apples in
+a harvest sample this year turns out to be rotten. At .05 significance level, can we reject the null
+hypothesis that the proportion of rotten apples in harvest stays below 12% this year?
+
+
+Solution
+The null hypothesis is that p ??? 0.12. We begin with computing the test statistic.
+
+> pbar = 30/214          # sample proportion 
+> p0 = .12               # hypothesized value 
+> n = 214                # sample size 
+> z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+> z                      # test statistic 
+[1] 0.90875
+
+
+```{r}
+pbar = 30/214          # sample proportion 
+p0 = .12               # hypothesized value 
+n = 214                # sample size 
+z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+z                      # test statistic 
+
+```
+Error: unexpected input in "z = (pbar\"
+[1] 0.90875
+
+
+
+We then compute the critical value at .05 significance level.
+
+> alpha = .05 
+> z.alpha = qnorm(1???alpha) 
+> z.alpha                # critical value 
+[1] 1.6449
+
+
+```{r}
+alpha = .05 
+z.alpha = qnorm(1???alpha) 
+z.alpha                # critical value 
+
+```
+Error: unexpected input in "z.alpha = qnorm(1\"
+[1] 1.6449
+
+
+Answer
+The test statistic 0.90875 is not greater than the critical value of 1.6449. Hence, at .05 significance level, we do not reject the null hypothesis that the proportion of rotten apples in harvest stays below 12% this year.
+
+
+Alternative Solution 
+Instead of using the critical value, we apply the pnorm function to compute the upper tail p-value of the test statistic. As it turns out to be greater than the .05 significance level, we do not reject the null hypothesis that p ??? 0.12.
+
+> pval = pnorm(z, lower.tail=FALSE) 
+> pval                   # upper tail p???value 
+
+
+
+```{r}
+pval = pnorm(z, lower.tail=FALSE) 
+pval                   # upper tail p???value 
+
+```
+
+
+
+
+
+
+
+
+
+
+Exercise 9: Two-Tailed Test of Population Proportion
+The null hypothesis of the two-tailed test about population proportion can be expressed as
+follows:
+where p0 is a hypothesized value of the true population proportion p.
+Let us define the test statistic z in terms of the sample proportion and the sample size:
+Then the null hypothesis of the two-tailed test is to be rejected if z ??????zá???2 or z ??? zá???2 , where zá???2 is
+the 100(1 ??? á) percentile of the standard normal distribution.
+Problem
+Suppose a coin toss turns up 12 heads out of 20 trials. At .05 significance level, can one reject the null hypothesis that the coin toss is fair?
+
+
+Solution
+The null hypothesis is that p = 0.5. We begin with computing the test statistic.
+
+> pbar = 12/20           # sample proportion 
+> p0 = .5                # hypothesized value 
+> n = 20                 # sample size 
+> z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+> z                      # test statistic 
+[1] 0.89443
+
+
+
+```{r}
+pbar = 12/20           # sample proportion 
+p0 = .5                # hypothesized value 
+n = 20                 # sample size 
+z = (pbar???p0)/sqrt(p0???(1???p0)/n) 
+z                      # test statistic 
+
+```
+Error: unexpected input in "z = (pbar\"
+[1] 0.89443
+
+
+We then compute the critical values at .05 significance level.
+
+> alpha = .05 
+> z.half.alpha = qnorm(1???alpha/2) 
+> c(???z.half.alpha, z.half.alpha) 
+[1] ???1.9600  1.9600
+
+
+```{r}
+alpha = .05 
+z.half.alpha = qnorm(1???alpha/2) 
+c(???z.half.alpha, z.half.alpha) 
+
+```
+Error: unexpected input in "z.half.alpha = qnorm(1\"
+[1] ???1.9600  1.9600
+
+
+
+Answer
+The test statistic 0.89443 lies between the critical values -1.9600 and 1.9600. Hence, at .05 significance level, we do not reject the null hypothesis that the coin toss is fair.
+
+Alternative Solution 
+Instead of using the critical value, we apply the pnorm function to compute the two-tailed p-value of the test statistic. It doubles the upper tail p-value as the sample proportion is greater than the hypothesized value. Since it turns out to be greater than the .05 significance level, we do not reject the null hypothesis that p = 0.5.
+
+> pval = 2 ??? pnorm(z, lower.tail=FALSE)  # upper tail 
+> pval                   # two???tailed p???value 
+[1] 0.37109
+
+```{r}
+pval = 2 ??? pnorm(z, lower.tail=FALSE)  # upper tail 
+pval                   # two???tailed p???value 
+
+```
+Error: unexpected input in "pval = 2 \"
+[1] 0.37109
+
+
+
+
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab05 !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

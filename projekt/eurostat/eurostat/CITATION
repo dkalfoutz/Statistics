@@ -1,0 +1,27 @@
+citHeader("Kindly cite the eurostat R package as follows:")
+
+
+note <- sprintf("R package version %s", meta$Version)
+
+citEntry(entry="misc",
+         title = "eurostat R package",
+         author = personList(
+	   person(given ="Leo", family="Lahti", email = "leo.lahti@iki.fi"),
+	   person(given = "Janne", family="Huovari"),
+	   person(given = "Markus", family="Kainu"),
+	   person(given = "Przemyslaw", family="Biecek")	   
+         ),
+	 journal = "R Journal. Accepted for publication.",
+	 year = "2017",
+	 url = "http://ropengov.github.io/eurostat",
+	 note = note, 
+         textVersion =
+         paste("(C) Leo Lahti, Janne Huovari, Markus Kainu, Przemyslaw Biecek.",
+	       "R Journal 2017. Accepted for publication.",
+               "Retrieval and analysis of Eurostat open data with the eurostat package",
+	       note,
+	       "URL: http://ropengov.github.io/eurostat",
+               sep=" ")
+         )
+
+

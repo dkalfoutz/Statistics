@@ -1,0 +1,49 @@
+famID	Sex	Cholesterol 		MAX Fem.pop.	MAX Male Pop.	MIN FEM. Pop.	MIN MALE POP.	MAX TOTAL POPULATION	MEDIAN FEM POP.	MEDIAN MALE POP.	MEDIAN MIXED POP.	MODE FEM POP.	MODE MALE POP.	MODE MIXED POP.
+1	M	234		255	271	118	219	271	190	234	223,5	186	234	234
+2	M	219												
+3	M	256												
+4	M	223												
+5	M	240												
+6	M	229												
+7	M	234												
+8	M	261												
+9	M	224												
+10	M	238												
+11	M	220												
+12	M	271												
+13	M	243												
+14	M	237												
+15	M	232												
+16	F	118
+17	F	255
+18	F	213
+19	F	148
+20	F	246
+21	F	193
+22	F	168
+23	F	222
+24	F	186
+25	F	190
+26	F	216
+27	F	186
+28	F	181
+29	F	162
+30	F	227
+
+
+274		453		118
+		475		
+
+		463		
+
+		463		
+		495		
+
+
+
+3		453		
+5				
+
+
+
+465		6472

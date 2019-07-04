@@ -1,0 +1,541 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab04 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+Lab 4: Exploratory Data Analysis
+
+Experimental Data Analysis (eda) is the process of looking at a data set to see what are the appropriate statistical inferences that can possibly be learned. For univariate data, we can ask if the data is approximately normal, longer tailed, or shorter tailed? Does it have symmetry, or is it skewed? Is it unimodal, bimodal or multi-modal? The main tool is the proper use of computer graphics.
+
+
+4.1  Our toolbox
+Our toolbox for eda consists of graphical representations of the data and our interpretation. Here is a summary of graphical methods covered so far:
+barplots
+for categorical data
+histogram, dot plots, stem and leaf plots
+to see the shape of numerical distributions
+boxplots
+to see summaries of a numerical distribution, useful in comparing distributions and identifying long and short-tailed distributions.
+normal probability plots
+To see if data is approximately normal
+It is useful to have many of these available with one easy function. The function simple.eda does exactly that. 
+
+Here are some examples of distributions with different shapes.
+
+
+4.2  Examples
+
+Example: Homedata
+The dataset homedata contains assessed values for Maplewood, NJ for the year 1970 and the year 2000. What is the shape of the distribution?
+
+
+```{r}
+library(UsingR)
+
+data(homedata)                # from simple package
+attach(homedata)              
+hist(y1970);hist(y2000)       # make two histograms
+detach(homedata)              # clean up
+```
+Figure 35: Histograms of Maplewood homes in 1970 and 2000
+
+
+On first appearances (figure 35), the 1970 data looks more normal, the year 2000 data has a heavier tail. Let's see using our simple.eda function.
+
+```{r}
+attach(homedata)              
+simple.eda(y1970);simple.eda(y2000)     
+detach(homedata)              # clean up
+```
+Figure 36: 1970 Maplewood home data  Figure 37: 2000 Maplewood N.J. home data
+
+
+The 1970 and year 2000 data are shown (figures 36 and 37).
+
+
+Neither looks particularly normal -- both are heavy tailed and skewed. Any analysis will want to consider the medians or a transformation.
+
+
+Example: CEO salaries
+The data set exec.pay gives the total direct compensation for CEO's at 200 large publicly traded companies in the U.S for the year 2000 (in units of $100,000). What can we say about this distribution besides it looks like good work if you can get it? Using simple.eda yields
+
+```{r}
+data(exec.pay)                # or read in from file
+simple.eda(exec.pay)
+```
+Figure 38: Executive pay data
+
+________________________________________
+we see a heavily skewed distribution as we might expect. A transformation is called for, let's try the logarithmic transformation (base 10). Since some values are 0 (these CEO's are directly compensated less than $100,000 or perhaps were forced to return all profits in a plea arrangement to stay out of jail), we ask not to include these.
+
+```{r}
+log.exec.pay = log(exec.pay[exec.pay >0])/log(10) # 0 is a problem
+simple.eda(log.exec.pay)  
+```
+Figure 39: Executive pay after log transform
+
+________________________________________
+This is now very symmetric and gives good insight into the actual distribution. (Almost log normal, which says that after taking a logarithm, it looks like a normal.) Any analysis will want to use resistant measures such as the median or a transform prior to analysis.
+
+
+
+
+Example: Taxi time at EWR
+The dataset ewr contains taxi in and taxi out times at Newark airport (EWR). Let's see what the trends are.
+
+```{r}
+data(ewr)
+names(ewr)                    # only 3-10 are raw data
+ 
+airnames = names(ewr)         # store them for later
+ewr.actual = ewr[,3:10]       # get the important columns
+boxplot(ewr.actual)
+```
+Figure 40: Taxi in and out times at Newark Airport (EWR)
+
+
+________________________________________
+All of them look skewed. Let's see if there is a difference between taxi in and out times.
+
+
+```{r}
+par(mfrow=c(2,4))             # 2 rows 4 columns
+attach(ewr)
+for(i in 3:10) boxplot(ewr[,i] ~ as.factor(inorout),main=airnames[i])    
+detach(ewr)
+par(mfrow=c(1,1))             # return graphics as is (or close window)
+```
+Figure 41: Taxi in and taxi out by airline at EWR
+
+________________________________________
+(The third line is the only important one. Here we used the boxplot command with the model notation -- of the type boxplot(y ~ x) -- which when x is a factor, does separate boxplots for each level. The command as.factor ensures that the variable inorout is a factor. Also note, we used a for loop to show all 8 plots.
+
+Notice the taxi in times are more or less symmetric with little variation (except for HP -- America West -- with a 10 minute plus average). The taxi out times have a heavy tail. At EWR, when the airport is busy, the planes can really backup and the 30 minute wait is not unusual. The data for Northwest (NW) seems to be less. We can compare this using statistical tests. Since the distributions are skewed, we may wish to compare the medians. (In general, be careful when applying statistical tests to summarized data.)
+
+
+
+Example: Symmetric or skewed, Long or short?
+For unimodal data, there are 6 basic possibilities as it is symmetric or skewed, and the tails are short, regular or long. Here are some examples with random data from known distributions (figure 42).
+
+```{r}
+## symmetric: short, regular then long
+X=runif(100);boxplot(X,horizontal=T,bty=n)
+X=rnorm(100);boxplot(X,horizontal=T,bty=n)
+X=rt(100,2);boxplot(X,horizontal=T,bty=n)
+## skewed:  short, regular then long
+# triangle distribution
+X=sample(1:6,100,p=7-(1:6),replace=T);boxplot(X,horizontal=T,bty=n)
+X=abs(rnorm(200));boxplot(X,horizontal=T,bty=n)
+X=rexp(200);boxplot(X,horizontal=T,bty=n)   
+```
+Figure 42: Symmetric or skewed; short, regular or long
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4.3  Problems
+4.1
+Attach the data set babies (dataset is part of UsingR library which must install. The documentation of the library is included in Lab 4 file). Describe the distributions of the variables birth weight (bwt), gestation, age, height and weight.
+
+
+```{r}
+data(package="UsingR", babies)
+attach(babies)
+
+# summary(babies)
+#  ... NOTE: there is NO column named 'bwt',
+#      using wt
+
+boxplot(wt, horizontal=T, main="4.1 - wt: symmetric, long")
+
+boxplot(gestation, horizontal=T, main="4.1 - gestation: skewed, long")
+
+boxplot(age, horizontal=T, main="4.1 - age: skewed, regular")
+
+boxplot(ht, horizontal=T, main="4.1 - ht: symmetric, regular")
+
+
+#      using wt1
+boxplot(wt1, horizontal=T, main="4.1 - wt1: skewed, long")
+
+detach(babies)
+
+```
+
+
+
+
+
+
+
+
+
+4.2
+The Simple data set iq contains simulated scores on a hypothetical IQ test. What analysis is appropriate for measuring the center of the distribution? Why? (Note: the data reads in as a list.)
+
+
+```{r}
+data(package="UsingR", iq)
+
+summary(iq)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#   72.0    93.0   101.0   101.4   109.2   130.0 
+
+boxplot(iq, horizontal=T, main="4.2 - iq: symmetric, regular")
+
+#  ... me dedomeno afto to plot, h mean prepei na xrhsimpoihthei gia 
+# thn analysh tou iq
+```
+
+
+
+
+
+
+
+
+
+
+
+
+4.3
+The Simple data set slc contains data on red blood cell sodium-lithium countertransport activity for 190 individuals. Describe the shape of the distribution, estimate the center, state what is an appropriate measure of center for this data.
+
+```{r}
+data(package="UsingR", slc)
+
+summary(slc)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 0.0730  0.1920  0.2500  0.2632  0.3153  0.6230 
+
+boxplot(slc, horizontal=T, main="4.3 - slc: skewed, regular")
+
+#  ... dedomenhs afths ths plot, h median tha prepei na
+# xrhsimopoiithei gia thn analisi tis slc
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4.4
+The t distribution will be important later. It depends on a parameter called the degrees of freedom. Use the rt(n,df) function to investigate the t-distribution for n=100 and df=2, 10 and 25.
+
+```{r}
+par(mfrow=c(3,1), oma=c(0,0,2,0))
+boxplot(rt(100,2), horizontal=T, main="rt(100, df=2)")
+boxplot(rt(100,10), horizontal=T, main="rt(100, df=10)")
+boxplot(rt(100,25), horizontal=T, main="rt(100, df=25)")
+title("4.4 - Comparison of t-distribution and DF", outer=T)
+
+
+#  ... 
+
+### h t-distribution tou student öáßíåôáé íá åßíáé åëáöñþò me "klisi"
+# gia xamilotero df, proseggizontas mia pio simmetriki katanomi se
+#xamiloteres df times
+#Ç t-distribution xrhsimopoieitai merikes fores sti thesi ths kanonikis
+# otan ta pragmatika dedomena perilamvanoun heavy tails: en genei diladi
+# kai epi tis ousias omiloume peri isxyrhs parametrikis montelopoiisis ...
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4.5
+The x^???2 distribution also depends on a parameter called the degrees of freedom. Use the rchisq(n,df) function to investigate the ???2 distribution with n=100 and df=2,10 and 25
+
+```{r}
+par(mfrow=c(3,1), oma=c(0,0,2,0))
+boxplot(rchisq(100,2), horizontal=T, main="rchisq(100, df=2)")
+boxplot(rchisq(100,10), horizontal=T, main="rchisq(100, df=10)")
+boxplot(rchisq(100,25), horizontal=T, main="rchisq(100, df=25)")
+title("4.5 - Comparison of Chi-squared distribution and DF", outer=T)
+
+par(mfrow=c(1,1))
+
+#  ... Opws kai tou Student t, h Chi-squared fenetai na einai me "klisi" gia
+#      mikrotero-xamilotero df, proseggizontas mia pio simmetriki katanomh se
+#      ipsiloteres times df
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4.6
+The R dataset trees contains girth (diameter), height and volume (of boardfeet) measurements for several trees of a species of cherry tree. Describe the distributions of each of these 3 variables. Are any long tailed, short-tailed, skewed?
+
+```{r}
+library(UsingR)
+data(package="UsingR", Girth)
+data(package="UsingR", Height)
+data(package="UsingR", Volume)
+par(mfrow=c(3,1), oma=c(0,0,2,0))
+
+
+data(trees)
+summary(trees)
+#      Girth           Height       Volume     
+#  Min.   : 8.30   Min.   :63   Min.   :10.20  
+#  1st Qu.:11.05   1st Qu.:72   1st Qu.:19.40  
+#  Median :12.90   Median :76   Median :24.20  
+#  Mean   :13.25   Mean   :76   Mean   :30.17  
+#  3rd Qu.:15.25   3rd Qu.:80   3rd Qu.:37.30  
+#  Max.   :20.60   Max.   :87   Max.   :77.00  
+
+boxplot(Girth, horizontal=T, main="4.6 - Girth: skewed, regular")
+
+boxplot(Height, horizontal=T, main="4.6 - Height: slightly-skewed, regular")
+
+boxplot(Volume, horizontal=T, main="4.6 - Volume: skewed, regular")
+
+#### mou emfanizei kapoia perierga sfalmata, parolo pou einai oloswsta 
+## ta apotelesmata k h diadikasia, katopin pollaplwn elegxwn se allo netbook kai laptop
+##### MOU EMFANIZEI TA KATWTHI !!!! ####################
+#data set ???Girth??? not founddata set ???Height??? not founddata set ???Volume??? not found     Girth           Height       Volume     
+#Min.   : 8.30   Min.   :63   Min.   :10.20  
+# 1st Qu.:11.05   1st Qu.:72   1st Qu.:19.40  
+# Median :12.90   Median :76   Median :24.20  
+# Mean   :13.25   Mean   :76   Mean   :30.17  
+# 3rd Qu.:15.25   3rd Qu.:80   3rd Qu.:37.30  
+# Max.   :20.60   Max.   :87   Max.   :77.00  
+#Error in boxplot(Girth, horizontal = T, main = "4.6 - Girth: skewed, regular") : 
+# # object 'Girth' not found
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+4.7
+The Simple dataset dowdata contains the Dow Jones numbers from January 1999 to October 2000 and it is part of the library “UsingR”.  To access the dataset you need to install this library and activate it. The Black-Scholes theory is modeled on the assumption that the changes in the data within a day should be log normal. In particular, if Xn is the value on day n then log(Xn/Xn-1) should be normal. Investigate this as follows
+> install.packages(‘UsingR’)
+> library(UsingR)
+> data(dowdata)
+> x = dowdata[['Close']]        # look at daily closes
+> n = length(x)                 # how big is x?
+> z = log(x[2:n]/x[1:(n-1))     # This does X_n/X_(n-1)
+
+Now check if z is normal. What do you see?
+
+
+
+
+```{r}
+data(dowdata)
+summary(dowdata)
+#        Date          Open            High            Low       
+#  1-Apr-99:  1   Min.   : 9118   Min.   : 9268   Min.   : 8994  
+#  1-Aug-00:  1   1st Qu.:10402   1st Qu.:10602   1st Qu.:10217  
+#  1-Dec-99:  1   Median :10714   Median :10890   Median :10553  
+#  1-Feb-00:  1   Mean   :10609   Mean   :10777   Mean   :10448  
+#  1-Feb-99:  1   3rd Qu.:11008   3rd Qu.:11172   3rd Qu.:10845  
+#  1-Jul-99:  1   Max.   :11719   Max.   :11908   Max.   :11506  
+#  (Other) :437                                                  
+#  
+#       Close      
+#   Min.   : 9121  
+#   1st Qu.:10401  
+#   Median :10719  
+#   Mean   :10609  
+#   3rd Qu.:11006  
+#   Max.   :11723  
+
+x <- dowdata$Close
+n <- length(x)
+z <- log(x[2:n]/x[1:(n-1)])
+
+par(mfrow=c(1,3), oma=c(0,0,2,0))
+hist(x, main="hist(x)")
+boxplot(x, main="boxplot(x)")
+qqnorm(x, main="qqnorm(x)") 
+qqline(x, col="red")
+title("4.7 - dowdata: w/out logarithmic transformation", outer=T)
+
+
+par(mfrow=c(1,3), oma=c(0,0,2,0))
+hist(z, main="hist(z)")
+boxplot(z, main="boxplot(z)")
+qqnorm(z, main="qqnorm(z)") 
+qqline(z, col="red")
+title("4.7 - dowdata: w/ logarithmic transformation", outer=T)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4.8
+The children's game of Chutes and Ladders can be simulated easily in R. The time it takes for a player to make it to the end has an interesting distribution. To simulate the game, you can use the Simple function simple.chutes as follows.
+
+> results=c()
+> for(i in 1:200) results[i]=length(simple.chutes(sim=TRUE))
+> hist(results)
+  
+Describe the resulting distribution in words. What percentage of the time did it take more than 100 turns? What is the median and compare it to the mean of your sample.
+
+To view a trajectory (the actual dice rolls), you can just plot as follows
+
+> plot(simple.chutes(1)) 
+
+
+```{r}
+results <- c()
+for (i in 1:200) results[i]=length(simple.chutes(sim=T))
+
+#  ... results are skewed, long-tailed,
+#      but you must see for yourself
+par(mfrow=c(1,3), oma=c(0,0,2,0))
+hist(results, main="hist(results)")
+boxplot(results, main="boxplot(results)")
+qqnorm(results, main="qqnorm(results)")
+qqline(results, col="red")
+title("4.8 - Chutes & Ladders: histogram, boxplot & normal plot", outer=T)
+
+
+#  ... percentage of results > 100?
+sum(results>100)/n
+# [1] 0.02708804
+
+#  ... compare median and mean
+summary(results)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 9.00   22.00   37.00   44.12   56.25  174.00 
+
+par(mfrow=c(1,1))
+plot(simple.chutes(1), main="4.8 - Trajectory of Chutes & Ladders")
+
+
+```
+
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!! 905_Kalfountzos_Dimitrios_lab04 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
